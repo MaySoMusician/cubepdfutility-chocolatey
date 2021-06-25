@@ -3,20 +3,20 @@
 
 function GetLatestFromReleases($releases) {
     foreach ($r in $releases[0]) {
-        if($r.name -match "CubePDF Utility \d.\d.\d") {
-            return $r
+        if ($r.body -match "CubePDF Utility (\d.\d.\d)") {
+            return $Matches[1]
         }
     }
 }
 
 function global:au_GetLatest {
     $releases = @(Invoke-WebRequest https://api.github.com/repos/cube-soft/Cube.Pdf/releases -UseBasicParsing | ConvertFrom-Json)
-    $version = (GetLatestFromReleases $releases).name.Replace("CubePDF Utility ", "").Replace(" beta", "b")
+    $version = (GetLatestFromReleases $releases)
 
     return @{ 
-        Version = $version;
-        URL32 = ("https://dl.cube-soft.jp/archive/cubepdf-utility-{0}.exe" -F $version);
-        URL64 = ("https://dl.cube-soft.jp/archive/cubepdf-utility-{0}-x64.exe" -F $version);
+        Version        = $version;
+        URL32          = ("https://dl.cube-soft.jp/archive/cubepdf-utility-{0}.exe" -F $version);
+        URL64          = ("https://dl.cube-soft.jp/archive/cubepdf-utility-{0}-x64.exe" -F $version);
         ChecksumType32 = 'sha256'
     }
 }
@@ -24,10 +24,10 @@ function global:au_GetLatest {
 function global:au_SearchReplace {
     @{
         "tools\chocolateyInstall.ps1" = @{
-            "(^[$]url\s*=\s*)('.*')"      = "`$1'$($Latest.URL32)'"           #1
+            "(^[$]url\s*=\s*)('.*')"          = "`$1'$($Latest.URL32)'"           #1
             "(?i)(^\s*checksum\s*=\s*)'.*'"   = "`$1'$($Latest.Checksum32)'"      #2
-            "(^[$]url64\s*=\s*)('.*')"      = "`$1'$($Latest.URL64)'"           #1
-            "(?i)(^\s*checksum64\s*=\s*)'.*'"   = "`$1'$($Latest.Checksum64)'"      #2
+            "(^[$]url64\s*=\s*)('.*')"        = "`$1'$($Latest.URL64)'"           #1
+            "(?i)(^\s*checksum64\s*=\s*)'.*'" = "`$1'$($Latest.Checksum64)'"      #2
         }
     }
 }
