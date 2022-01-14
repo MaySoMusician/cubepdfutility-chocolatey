@@ -3,7 +3,7 @@
 
 function GetLatestFromReleases($releases) {
     foreach ($r in $releases[0]) {
-        if ($r.body -match "CubePDF Utility (\d.\d.\d)") {
+        if (($r.body -match "CubePDF Utility (\d.\d.\d)") -Or ($r.name -match "CubePDF Utility (\d.\d.\d)")) {
             return $Matches[1]
         }
     }
