@@ -5,8 +5,8 @@ $ErrorActionPreference = 'Stop';
 
 $packageName= 'cubepdfutility'
 $toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$url        = 'https://dl.cube-soft.jp/archive/cubepdf-utility-1.6.7.exe'
-$url64      = 'https://dl.cube-soft.jp/archive/cubepdf-utility-1.6.7-x64.exe'
+$url        = 'https://dl.cube-soft.jp/archive/cubepdf-utility-3.0.0.exe'
+$url64      = 'https://dl.cube-soft.jp/archive/cubepdf-utility-3.0.0-x64.exe'
 
 $packageArgs = @{
   packageName   = $packageName
@@ -18,9 +18,9 @@ $packageArgs = @{
   softwareName  = 'cubepdfutility*'
 
   # Checksums are calculated with the binaries downloaded from the official website, not the GitHub repository
-  checksum      = '6ac88c086bc97a14f50969c91f1d7a69744c96e526d6cd654c5bbe4a45669a6a'
+  checksum      = '9c084d98a45f92a61eb8d8c650afbb5dda67e744d90916b702cbcca7c0842720'
   checksumType  = 'sha256'
-  checksum64    = 'ebf426dc048c7f4703a70506a2f1005ba05abff775866eef7e948ced5bd852f6'
+  checksum64    = '93a56b25206cbdc1666912cb9f0f9fb089154d31b77b8e538f27e4bab9d9f26a'
   checksumType64= 'sha256'
 
   silentArgs   = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-'
