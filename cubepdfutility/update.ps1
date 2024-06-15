@@ -3,17 +3,20 @@
 
 function GetLatestFromReleases($releases) {
     foreach ($r in $releases[0]) {
-        if (($r.body -match "### CubePDF Utility (\d.\d.\d)") -Or ($r.name -match "CubePDF Utility (\d.\d.\d)")) {
-            return $Matches[1]
+        foreach ($asset in $r.assets) {
+            if ($asset.name -match "cubepdf-utility-(\d.\d.\d).exe") {
+                return $Matches[1]
+            }
         }
     }
+    throw "No version found."
 }
 
 function global:au_GetLatest {
     $releases = @(Invoke-WebRequest https://api.github.com/repos/cube-soft/Cube.Pdf/releases -UseBasicParsing | ConvertFrom-Json)
     $version = (GetLatestFromReleases $releases)
 
-    return @{ 
+    return @{
         Version        = $version;
         URL32          = ("https://dl.cube-soft.jp/archive/cubepdf-utility-{0}.exe" -F $version);
         URL64          = ("https://dl.cube-soft.jp/archive/cubepdf-utility-{0}-x64.exe" -F $version);
