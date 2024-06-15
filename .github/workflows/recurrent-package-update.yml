@@ -1,0 +1,61 @@
+# cf: https://www.dolthub.com/blog/2021-10-13-how-to-publish-winget-chocolatey-packages-with-github-actions/
+name: Recurrent Package Update
+
+run-name: Recurrent CubePDF Utility Package Update
+
+on:
+  schedule:
+    - cron: "5 3 */4 * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  update:
+    name: Update CubePDF Utility Package
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: powershell
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Chocolatey Automatic Package Updater Module
+        run: choco install chocolatey-au
+      - name: Build package
+        id: build-package
+        working-directory: ./cubepdfutility
+        run: |
+          $result = (./update.ps1)
+          echo "UPDATED=$($result.Updated)" >> "$env:GITHUB_OUTPUT"
+          echo "NEW_VERSION=$($result.RemoteVersion)" >> "$env:GITHUB_OUTPUT"
+        env:
+          au_Push: "false"
+      - name: Notify skip
+        if: ${{ success() && steps.build-package.outputs.UPDATED != 'True' }}
+        run: |
+          echo "## CubePDF Utility Package Build Status for $(Get-Date -Format "yyyy-MM-dd")" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Current package is up to date.** Will not push it again to chocolatey." >> $env:GITHUB_STEP_SUMMARY
+      - name: Test package installer
+        if: ${{ success() && steps.build-package.outputs.UPDATED == 'True' }}
+        working-directory: ./cubepdfutility
+        run: Test-Package $Install
+      - uses: EndBug/add-and-commit@v9
+        if: ${{ success() && steps.build-package.outputs.UPDATED == 'True' }}
+        with:
+          message: "[recurrent-package-update] Update CubePDF Utility to ${{ steps.build-package.outputs.NEW_VERSION }}"
+          add: "."
+          cwd: "."
+      - name: Push package to Chocolatey
+        if: ${{ success() && steps.build-package.outputs.UPDATED == 'True' }}
+        run: Push-Package
+        working-directory: ./cubepdfutility
+        env:
+          api_key: ${{ secrets.CHOCOLATEY_API_KEY }}
+          au_Push: "true"
+      - name: Output results
+        if: ${{ success() && steps.build-package.outputs.UPDATED == 'True' }}
+        run: |
+          echo "## CubePDF Utility Package Build Status for $(Get-Date -Format "yyyy-MM-dd")" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Package updated to ${{ steps.build-package.outputs.NEW_VERSION }}** and pushed to chocolatey." >> $env:GITHUB_STEP_SUMMARY
