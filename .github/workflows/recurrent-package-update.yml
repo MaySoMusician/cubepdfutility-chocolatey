@@ -105,6 +105,8 @@ jobs:
 
       - name: Output results
         if: ${{ success() && steps.build-package.outputs.UPDATED == 'True' }}
+        env:
+          NEW_VERSION: ${{ steps.build-package.outputs.NEW_VERSION }}
         run: |
           $date = Get-Date -Format 'yyyy-MM-dd'
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## CubePDF Utility Package Build Status for $date"
